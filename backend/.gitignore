@@ -9,7 +9,7 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-/desktop.ini
+ desktop.ini
 
 # testing
 /coverage
