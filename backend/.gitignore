@@ -1,6 +1,10 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# OS files
+desktop.ini
+.DS_Store
+
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -9,34 +13,31 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
- desktop.ini
 
-# testing
+# NestJS / TypeScript compilation output
+/dist
+/build
+*.tsbuildinfo
+
+# Testing
 /coverage
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# Environment variables (CRITICAL pentru backend - nu urca parole/chei API)
+.env
+.env.development
+.env.production
+.env.local
+.env.*.local
 
-# vercel
-.vercel
+# Security certificates
+*.pem
 
-# typescript
-*.tsbuildinfo
-next-env.d.ts
+# IDEs and editors
+.vscode/
+.idea/
