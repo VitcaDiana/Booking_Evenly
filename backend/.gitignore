@@ -41,3 +41,4 @@ yarn-error.log*
 # IDEs and editors
 .vscode/
 .idea/
+/generated/prisma
