@@ -14,6 +14,36 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
+
+  //helpers 
+  private async generateTokens(userId: number, email: string){
+    const payload: JwtPayload = {sub : userId, email};
+
+    const access_token = this.jwtService.sign(payload,
+      {
+        secret: process.env.JWT_SECRET,
+        expiresIn: '15m',
+      });
+
+      const refresh_token = this.jwtService.sign(payload, 
+        {
+          secret: process.env.JWT_REFRESH_SECRET,
+          expiresIn: '7d',
+        });
+        return {access_token, refresh_token};
+  }
+
+    private async saveRefreshToken(userId: number, refresh_token: string){
+      const hashed = await bcrypt.hash(refresh_token, 10);
+      await this.prisma.user.update({
+        where: {id: userId},
+        data: {refreshToken: hashed},
+      });
+    }
+
+
+    //endpoints
+
   async register(dto: RegisterDto) {
     const existing = await this.prisma.user.findUnique({
       where: { email: dto.email },
@@ -56,13 +86,36 @@ export class AuthService {
     if(!passwordMatch){
       throw new UnauthorizedException('Invalid credentials');
     }
-    //generate JWT
-    const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-    };
 
-    const access_token = this.jwtService.sign(payload);
-    return{access_token};
+    const tokens = await this.generateTokens(user.id, user.email);
+    await this.saveRefreshToken(user.id, tokens.refresh_token);
+    return tokens;
   }
-}
+  async refresh(userId: number, refreshToken: string){
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId},
+    });
+    if(!user || !user.refreshToken){
+      throw new UnauthorizedException('Acess denied');
+    }
+    //check out if the refresh token from the request is the same as the one in db
+    const tokenMatch = await bcrypt.compare(refreshToken, user.refreshToken);
+
+    if(!tokenMatch){
+      throw new UnauthorizedException('Acess denied');
+    }
+    const tokens = await this.generateTokens(user.id,user.email);
+    await this.saveRefreshToken(user.id,tokens.refresh_token);
+    return tokens;
+  }
+  async logout(userId: number){
+    await this.prisma.user.update({
+      where: {id: userId},
+      data: {refreshToken: null},
+    });
+    return {message: 'Logged out successfully'};
+  }
+  
+   
+  }
+

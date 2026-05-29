@@ -16,4 +16,13 @@ export class AuthController {
     login(@Body() dto: LoginDto){
         return this.authService.login(dto);
     }
+
+     @Post('refresh')
+    refresh(@Body() body: {userId: number, refreshToken: string}) {
+        return this.authService.refresh(body.userId, body.refreshToken);
+    }
+     @Post('logout')
+    logout(@Body() body : {userId: number}){
+        return this.authService.logout(body.userId);
+    }
 }
